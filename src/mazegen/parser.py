@@ -96,6 +96,15 @@ def load_config(file_path: str) -> MazeConfig:
                 if clean_key not in allowed_keys:
                     continue
 
+                new_value = val.strip()
+                if clean_key in cfg_data:
+                    print(
+                        f"Warning: Line {line_num}: '{clean_key}' is "
+                        f"defined more than once. Using '{new_value}' "
+                        f"instead of '{cfg_data[clean_key]}'.",
+                        file=sys.stderr,
+                    )
+
                 cfg_data[clean_key] = val.strip()
 
     except FileNotFoundError:
