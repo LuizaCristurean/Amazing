@@ -173,14 +173,15 @@ class MazeGenerator:
         if not pending:
             return
 
-        seed_cell = pending[0]
+        seed_cell = random.choice(pending)
         connected: Set[Coord] = {seed_cell}
-        pending = pending[1:]
+        pending = [c for c in pending if c != seed_cell]
 
         progress = True
         while pending and progress:
             progress = False
             still_pending = []
+            random.shuffle(pending)
 
             for coord in pending:
                 if self._connect_cell_binary_tree(coord, connected):

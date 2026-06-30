@@ -8,8 +8,8 @@ interactive terminal menu to regenerate, solve, or recolor the maze.
 
 import time
 import sys
-from src.mazegen.parser import load_config, MazeConfig
-from src.mazegen.generator import MazeGenerator
+from mazegen.parser import load_config, MazeConfig
+from mazegen.generator import MazeGenerator
 
 
 def write_output_file(
