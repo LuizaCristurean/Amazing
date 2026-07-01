@@ -8,6 +8,7 @@ interactive terminal menu to regenerate, solve, or recolor the maze.
 
 import time
 import sys
+from typing import List
 from mazegen.parser import load_config, MazeConfig
 from mazegen.generator import MazeGenerator
 
@@ -62,8 +63,10 @@ def display_menu() -> None:
     print("\n" + "=" * 10 + " A-Maze-ing " + "=" * 10)
     print("1. Re-generate a new maze")
     print("2. Show/Hide path from entry to exit")
-    print("3. Rotate maze colors")
-    print("4. Quit")
+    print("3. Rotate wall color")
+    print("4. Rotate path color")
+    print("5. Rotate pattern (42) color")
+    print("6. Quit")
 
 
 def main() -> None:
@@ -96,13 +99,35 @@ def main() -> None:
     write_output_file(cfg.output_file, gen, cfg)
 
     show_path = False
-    current_color_idx = 0
-    colors = [
-        "\033[38;5;250m",
-        "\033[38;5;211m",
-        "\033[38;5;120m",
-        "\033[38;5;117m"
-        ]
+    current_wall_idx = 0
+    current_path_idx = 0
+    current_pattern_idx = 0
+
+    from mazegen.parser import (
+        WALL_PALETTE, PATH_PALETTE, PATTERN_PALETTE
+    )
+
+    def make_palette(base: List[int], start: int) -> List[int]:
+        """Return a palette that begins with ``start``.
+
+        If ``start`` is already the first element, the base palette is
+        returned unchanged. Otherwise ``start`` is prepended so the
+        program opens with exactly the color the user configured.
+        """
+        if base and base[0] == start:
+            return base
+        if start in base:
+            idx = base.index(start)
+            return base[idx:] + base[:idx]
+        return [start] + base
+
+    wall_palette = make_palette(WALL_PALETTE, cfg.wall_color)
+    path_palette = make_palette(PATH_PALETTE, cfg.path_color)
+    pattern_palette = make_palette(PATTERN_PALETTE, cfg.pattern_color)
+
+    current_wall_idx = 0
+    current_path_idx = 0
+    current_pattern_idx = 0
 
     while True:
         sys.stdout.write("\033[2J\033[H")
@@ -110,6 +135,10 @@ def main() -> None:
 
         start_coord = cfg.entry
         end_coord = cfg.exit
+
+        wall_ansi = f"\033[38;5;{wall_palette[current_wall_idx]}m"
+        path_code = path_palette[current_path_idx]
+        pattern_code = pattern_palette[current_pattern_idx]
 
         p_coords = None
         if show_path:
@@ -122,15 +151,17 @@ def main() -> None:
 
         gen.maze.print_maze(
             path_coords=p_coords,
-            wall_color=colors[current_color_idx],
+            wall_color=wall_ansi,
             entry_coord=cfg.entry,
-            exit_coord=cfg.exit
+            exit_coord=cfg.exit,
+            path_color=path_code,
+            pattern_color=pattern_code,
         )
 
         display_menu()
 
         try:
-            choice = input("Choice? (1-4): ").strip()
+            choice = input("Choice? (1-6): ").strip()
         except (KeyboardInterrupt, EOFError):
             print("\nExiting...")
             break
@@ -162,9 +193,11 @@ def main() -> None:
                     partial_path = full_path[:i]
                     gen.maze.print_maze(
                         path_coords=partial_path,
-                        wall_color=colors[current_color_idx],
+                        wall_color=wall_ansi,
                         entry_coord=start_coord,
-                        exit_coord=end_coord
+                        exit_coord=end_coord,
+                        path_color=path_code,
+                        pattern_color=pattern_code,
                     )
                     time.sleep(0.04)
 
@@ -177,14 +210,24 @@ def main() -> None:
                 sys.stdout.flush()
 
         elif choice == "3":
-            current_color_idx = (current_color_idx + 1) % len(colors)
+            current_wall_idx = (current_wall_idx + 1) % len(wall_palette)
             print("\n[!] Wall color rotated.")
 
         elif choice == "4":
+            current_path_idx = (current_path_idx + 1) % len(path_palette)
+            print("\n[!] Path color rotated.")
+
+        elif choice == "5":
+            current_pattern_idx = (
+                (current_pattern_idx + 1) % len(pattern_palette)
+            )
+            print("\n[!] Pattern (42) color rotated.")
+
+        elif choice == "6":
             print("\nGoodbye! :)")
             break
         else:
-            print("\n[Invalid choice] Please enter a number between 1 and 4.")
+            print("\n[Invalid choice] Please enter a number between 1 and 6.")
 
 
 if __name__ == "__main__":

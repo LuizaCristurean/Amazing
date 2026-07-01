@@ -4,7 +4,7 @@
 
 ## 📝 Description
 
-**A-Maze-ing** is a Python maze generator and solver. Given a configuration file, it generates a maze on a rectangular grid, draws a recognizable "42" pattern in its center, writes the maze to a file using a compact hexadecimal wall encoding, and displays it interactively in the terminal. The display lets you regenerate the maze, show or hide the shortest path between the entry and the exit, and cycle through wall colors.
+**A-Maze-ing** is a Python maze generator and solver. Given a configuration file, it generates a maze on a rectangular grid, draws a recognizable "42" pattern in its center, writes the maze to a file using a compact hexadecimal wall encoding, and displays it interactively in the terminal. The display lets you regenerate the maze, show or hide the shortest path between the entry and the exit, and independently cycle through colors for the walls, the solution path, and the "42" pattern.
 
 The maze generation logic itself lives in a separate, reusable package (`mazegen`, see below) so it can be imported and reused in other projects without depending on the terminal display or the configuration file format.
 
@@ -55,6 +55,31 @@ starting with `#` are comments and are ignored.
 | `PERFECT` | yes | `True` for a single-path maze, `False` to allow loops | `PERFECT=True` |
 | `SEED` | no | Integer seed for reproducible generation | `SEED=42` |
 | `ALGORITHM` | no | `backtracker` (default) or `binary_tree` | `ALGORITHM=backtracker` |
+| `WALL_COLOR` | no | Starting color for the maze walls | `WALL_COLOR=gray` |
+| `PATH_COLOR` | no | Starting color for the solution path | `PATH_COLOR=blue` |
+| `PATTERN_COLOR` | no | Starting color for the "42" pattern cells | `PATTERN_COLOR=green` |
+
+The three color keys accept either a color name or a raw ANSI
+256-color integer (0-255). 
+
+| Name | `WALL_COLOR` | `PATH_COLOR` | `PATTERN_COLOR` |
+|---|---|---|---|
+| `black` | ✓ | ✓ | ✓ |
+| `blue` | ✓ | ✓ (default) | ✓ |
+| `cyan` | ✓ | ✓ | ✓ |
+| `gray` | ✓ (default) | ✓ | ✓ |
+| `green` | ✓ | ✓ | ✓ (default) |
+| `magenta` | ✓ | ✓ | ✓ |
+| `orange` | ✓ | ✓ | ✓ |
+| `pink` | ✓ | ✓ | ✓ |
+| `purple` | ✓ | ✓ | ✓ |
+| `red` | ✓ | ✓ | ✓ |
+| `white` | ✓ | ✓ | ✓ |
+| `yellow` | ✓ | ✓ | ✓ |
+ 
+All 12 names are accepted for all three keys. If a key is omitted, the
+program uses its default (shown above). An invalid name causes a clear
+error message listing the accepted values.
  
 Example (the default `config.txt`):
  
@@ -67,7 +92,24 @@ PERFECT=True
 ALGORITHM=backtracker
 OUTPUT_FILE=output.txt
 SEED=42
+# Optional color overrides:
+# WALL_COLOR=pink
+# PATH_COLOR=cyan
+# PATTERN_COLOR=yellow
 ```
+
+### Interactive menu
+ 
+Once the program is running, the following options are available:
+ 
+| Key | Action |
+|---|---|
+| `1` | Re-generate a new random maze |
+| `2` | Show / hide the shortest path from entry to exit |
+| `3` | Rotate wall color (cycles through a built-in palette) |
+| `4` | Rotate path color |
+| `5` | Rotate "42" pattern color |
+| `6` | Quit |
 
 ## 🚀 Maze generation algorithm
  

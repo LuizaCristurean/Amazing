@@ -150,6 +150,8 @@ class Maze:
         wall_color: str = "\033[0m",
         entry_coord: Optional[Coord] = None,
         exit_coord: Optional[Coord] = None,
+        path_color: int = 33,
+        pattern_color: int = 46,
     ) -> None:
         """Print the maze to the terminal using ANSI colors.
 
@@ -160,11 +162,14 @@ class Maze:
                 derive the background color of the walls.
             entry_coord: Coordinate of the entry cell, drawn in green.
             exit_coord: Coordinate of the exit cell, drawn in red.
+            path_color: ANSI 256-color code for the solution path.
+            pattern_color: ANSI 256-color code for the '42' pattern
+                cells.
         """
         # ANSI COLORS
         RESET = "\033[0m"
-        GREEN_BG = "\033[42m"
-        BLUE_BG = "\033[48;5;33m"
+        GREEN_BG = f"\033[48;5;{pattern_color}m"
+        BLUE_BG = f"\033[48;5;{path_color}m"
         PATH_BG = "\033[48;5;236m"
 
         if "38;5;" in wall_color:

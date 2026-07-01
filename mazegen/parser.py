@@ -10,12 +10,31 @@ of letting the program crash with a raw traceback.
 
 import sys
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from .write_maze import Coord
 
 
 mandatory_keys = {'WIDTH', 'HEIGHT', 'ENTRY', 'EXIT', 'OUTPUT_FILE',
                   'PERFECT'}
+
+COLOR_NAMES: Dict[str, int] = {
+    "gray":    250,
+    "white":   255,
+    "black":   232,
+    "red":     196,
+    "orange":  214,
+    "yellow":  226,
+    "green":   46,
+    "cyan":    51,
+    "blue":    33,
+    "purple":  93,
+    "pink":    211,
+    "magenta": 201,
+}
+
+WALL_PALETTE: List[int] = [250, 211, 120, 117]
+PATH_PALETTE: List[int] = [33, 51, 226, 214, 211]
+PATTERN_PALETTE: List[int] = [46, 226, 214, 196, 51]
 
 
 @dataclass(frozen=True)
@@ -30,6 +49,9 @@ class MazeConfig:
     perfect: bool
     seed: Optional[int] = None
     algorithm: str = "backtracker"
+    wall_color: int = 250
+    path_color: int = 33
+    pattern_color: int = 46
 
 
 def get_coords(coord_str: str, w: int, h: int, key_name: str) -> Coord:
@@ -59,6 +81,41 @@ def get_coords(coord_str: str, w: int, h: int, key_name: str) -> Coord:
     return Coord(x, y)
 
 
+def parse_color(value: str, key_name: str) -> int:
+    """Parse and validate a color value from the configuration file.
+
+    Accepts either a color name (e.g. ``"blue"``) from the built-in
+    palette, or a raw ANSI 256-color integer (0-255).
+
+    Args:
+        value: Raw string value from the config file.
+        key_name: Name of the config key (used in error messages).
+
+    Returns:
+        The ANSI 256-color code as an integer.
+
+    Raises:
+        ValueError: If the value is not a known name or a valid
+            integer in the 0-255 range.
+    """
+    lower = value.lower().strip()
+    if lower in COLOR_NAMES:
+        return COLOR_NAMES[lower]
+    try:
+        code = int(lower)
+    except ValueError:
+        valid = ", ".join(sorted(COLOR_NAMES))
+        raise ValueError(
+            f"{key_name} '{value}' is not a known color name "
+            f"(accepted: {valid}) and is not a valid integer."
+        )
+    if not (0 <= code <= 255):
+        raise ValueError(
+            f"{key_name} value {code} is out of the ANSI color range (0-255)."
+        )
+    return code
+
+
 def load_config(file_path: str) -> MazeConfig:
     """Load, validate and return the maze configuration from a file.
 
@@ -77,7 +134,10 @@ def load_config(file_path: str) -> MazeConfig:
     """
 
     cfg_data: Dict[str, str] = {}
-    allowed_keys = mandatory_keys | {'SEED', 'ALGORITHM'}
+    allowed_keys = mandatory_keys | {
+        'SEED', 'ALGORITHM',
+        'WALL_COLOR', 'PATH_COLOR', 'PATTERN_COLOR'
+        }
 
     try:
         with open(file_path, 'r') as f:
@@ -152,6 +212,18 @@ def load_config(file_path: str) -> MazeConfig:
 
         algorithm = cfg_data.get('ALGORITHM', "backtracker")
 
+        wall_color = parse_color(
+            cfg_data['WALL_COLOR'], 'WALL_COLOR'
+        ) if 'WALL_COLOR' in cfg_data else 250
+
+        path_color = parse_color(
+            cfg_data['PATH_COLOR'], 'PATH_COLOR'
+        ) if 'PATH_COLOR' in cfg_data else 33
+
+        pattern_color = parse_color(
+            cfg_data['PATTERN_COLOR'], 'PATTERN_COLOR'
+        ) if 'PATTERN_COLOR' in cfg_data else 46
+
         return MazeConfig(
             width=width,
             height=height,
@@ -160,7 +232,10 @@ def load_config(file_path: str) -> MazeConfig:
             output_file=output_file,
             perfect=perfect,
             seed=seed,
-            algorithm=algorithm
+            algorithm=algorithm,
+            wall_color=wall_color,
+            path_color=path_color,
+            pattern_color=pattern_color,
         )
 
     except ValueError as error1:

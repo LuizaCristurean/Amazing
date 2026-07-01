@@ -6,3 +6,6 @@ PERFECT=True
 ALGORITHM=backtracker
 OUTPUT_FILE=output.txt
 SEED=42
+WALL_COLOR=pink
+PATH_COLOR=cyan
+PATTERN_COLOR=blue
