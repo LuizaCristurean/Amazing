@@ -129,8 +129,8 @@ Regardless of the algorithm chosen, two extra passes are always applied after ge
 All maze generation and pathfinding logic lives in the `mazegen` package (`src/mazegen/`), which has no dependency on the terminal display code or the configuration file parser. It is built as a standalone, pip-installable package:
  
 ```bash
-python3 -m build          # produces dist/mazegen-1.0.0-py3-none-any.whl
-pip install dist/mazegen-1.0.0-py3-none-any.whl
+make build          # produces dist/mazegen-1.0.0-py3-none-any.whl and a copy on the root directory.
+pip install mazegen-1.0.0-py3-none-any.whl
 ```
  
 ```python
@@ -158,7 +158,7 @@ debugging aid on the already-written code.
  
 | Member | Role |
 |---|---|
-| jmesa-ci | Configuration parsing (`parser.py`) and the core maze data structure / terminal rendering (`write_maze.py`). |
+| jmesa-ci | Configuration parsing (`parser.py`) and the core maze data structure / terminal rendering (`write_maze.py`) / packaging. |
 | lcristur | Generation algorithms, pathfinding, corridor/connectivity validation (`generator.py`), main program (`a_maze_ing.py`), packaging, and the fixes/review pass applied to the whole codebase. |
  
 We split the project along the natural module boundaries early on: one of us owned config parsing and the maze/rendering data structures, the other owned the generation algorithms and the program entry point. This worked well because both halves only need to agree on the `Maze`/`Cell`/`Coord` interface, which we fixed early and rarely had to change.
